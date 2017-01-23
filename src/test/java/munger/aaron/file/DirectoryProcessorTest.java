@@ -8,7 +8,7 @@ import java.util.List;
 
 public class DirectoryProcessorTest {
 
-    FileExtractor fileExtractor = new FileExtractorStub();
+    Extractor fileExtractor = new FileExtractorStub();
     CommandSpy command;
     DirectoryProcessor directoryProcessor;
 

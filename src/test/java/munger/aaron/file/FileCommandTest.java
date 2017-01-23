@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
-public class LineByLineCommandRunnerTest {
+public class FileCommandTest {
 
     CommandSpy spy;
     FileCommand commandRunner;

@@ -17,12 +17,17 @@ public class FileCommand implements Command {
 
     public void run(String filepath){
         File file = new File(filepath);
+        FileReader fileReader = null;
+        BufferedReader reader = null;
+
         try{
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            fileReader = new FileReader(file);
+            reader = new BufferedReader(fileReader);
             String line;
             while ((line = reader.readLine()) != null) {
                 command.run(line);
             }
+            reader.close();
         }
         catch(FileNotFoundException e){
             logger.log(Level.WARNING,"File not found exception thrown for " + file.getPath());
@@ -30,6 +35,22 @@ public class FileCommand implements Command {
         catch(IOException e){
             logger.log(Level.SEVERE, e.getMessage(), e);
         }
+        finally {
+            closeReader(fileReader);
+            closeReader(reader);
+        }
+    }
+
+    private void closeReader(Reader reader){
+        try{
+            if (reader != null){
+                reader.close();
+            }
+        }
+        catch (IOException e){
+            logger.log(Level.WARNING, e.getMessage(), e);
+        }
+
     }
 
 }

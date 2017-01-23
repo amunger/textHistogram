@@ -19,8 +19,24 @@ public class Histogram implements Command {
     public void printHistogram(){
         List<Map.Entry<String, Integer>> entryList = getSortedWordMap();
         for(Map.Entry<String, Integer> entry : entryList){
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+            int longest = findLongestKey(20);
+            String word = padRight(entry.getKey().toString() + ":", longest);
+            System.out.println(word + entry.getValue());
         }
+    }
+
+    private int findLongestKey(int max){
+        int longest = 0;
+        for (String key : wordMap.keySet()){
+            if (key.length() > longest && key.length() < max){
+                longest = key.length();
+            }
+        }
+        return longest;
+    }
+
+    private static String padRight(String s, int n) {
+        return String.format("%1$-" + n + "s", s);
     }
 
     private List<Map.Entry<String, Integer>> getSortedWordMap(){
