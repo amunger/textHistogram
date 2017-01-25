@@ -3,8 +3,12 @@ package munger.aaron.file;
 import munger.aaron.command.Command;
 
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DirectoryProcessor {
+
+    private static Logger logger = Logger.getLogger(FileCommand.class.getName());
 
     Command command;
     Extractor fileExtractor;
@@ -16,6 +20,11 @@ public class DirectoryProcessor {
 
     public void processFilesInDir(String path){
         File directory = new File(path);
+        if (!directory.isDirectory()){
+            logger.log(Level.WARNING, path + " does not map to a directory.");
+            return;
+        }
+
         File[] files = directory.listFiles();
         if (files!= null){
             for (File file : files) {
@@ -32,7 +41,7 @@ public class DirectoryProcessor {
             String extractedDir = fileExtractor.extract(file);
             processFilesInDir(extractedDir);
         }
-        else{
+        else if (file.getName().endsWith(".txt")){
             command.run(file.getPath());
         }
     }
