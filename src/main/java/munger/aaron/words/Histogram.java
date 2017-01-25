@@ -18,6 +18,8 @@ public class Histogram implements Command {
 
     public void printHistogram(){
         List<Map.Entry<String, Integer>> entryList = getSortedWordMap();
+        System.out.println();
+        System.out.println("RESULTS:");
         for(Map.Entry<String, Integer> entry : entryList){
             int longest = findLongestKey(20);
             String word = padRight(entry.getKey().toString() + ":", longest);

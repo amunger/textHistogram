@@ -10,7 +10,7 @@ public class StringFormatter {
 
     private static String removePunctuation(String original){
         return original
-                .replaceAll("[\\.,!\"\\?\\)](?:$| )", " ")
+                .replaceAll("[\\.,!\"\\?\\):;](?:$| )", " ")
                 .replaceAll("(?:^| )[\\(\"]", " ");
     }
 }
