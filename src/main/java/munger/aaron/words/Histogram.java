@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Histogram implements Command {
 
-    HashMap<String, Integer> wordMap = new HashMap<String, Integer>();
+    HashMap<String, Integer> wordMap = new HashMap<>();
 
     public void run(String string) {
         if (string != null && !string.isEmpty()) {
@@ -42,7 +42,7 @@ public class Histogram implements Command {
     }
 
     private List<Map.Entry<String, Integer>> getSortedWordMap(){
-        List<Map.Entry<String, Integer>> entryList = new LinkedList<Map.Entry<String, Integer>>(wordMap.entrySet());
+        List<Map.Entry<String, Integer>> entryList = new LinkedList<>(wordMap.entrySet());
         Collections.sort(entryList, new Comparator<Map.Entry<String, Integer>>() {
             public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
                 return (o1.getValue()).compareTo( o2.getValue()) * -1;
