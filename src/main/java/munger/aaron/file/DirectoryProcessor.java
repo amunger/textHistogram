@@ -2,10 +2,8 @@ package munger.aaron.file;
 
 import munger.aaron.command.Command;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +12,7 @@ public class DirectoryProcessor {
 
     private static Logger logger = Logger.getLogger(FileCommand.class.getName());
 
-    private static HashSet<String> pathsExplored = new HashSet<String>();
+    private HashSet<String> pathsExplored;
 
     Command command;
     Extractor fileExtractor;
@@ -22,27 +20,36 @@ public class DirectoryProcessor {
     public DirectoryProcessor(Command commandRunner, Extractor fileExtractor){
         this.command = commandRunner;
         this.fileExtractor = fileExtractor;
+        this.pathsExplored = new HashSet<>();
     }
 
     public void processFilesInDir(String path){
         logger.log(Level.INFO, "processing " + path);
 
-        File directory = new File(path);
-        if (!directory.isDirectory()){
+        Path directory = Paths.get(path);
+        if (!Files.isDirectory(directory)){
             logger.log(Level.WARNING, path + " does not map to a directory.");
             return;
         }
 
-        File[] files = directory.listFiles();
-        if (files!= null){
-            for (File file : files) {
-                processFile(file);
+        iterateOverDirectory(path, directory);
+    }
+
+    private void iterateOverDirectory(String path, Path directory) {
+        try {
+            DirectoryStream<Path> stream = Files.newDirectoryStream(directory);
+            for (Path entry : stream) {
+                processFile(entry);
             }
+            stream.close();
+        }
+        catch(IOException e){
+            logger.log(Level.SEVERE, "IO Exception thrown while streaming directory: " + path, e);
         }
     }
 
-    private void processFile(File file){
-        Path path = getPath(file);
+    private void processFile(Path file){
+        Path path = getNormalizedPath(file);
 
         if (path != null){
             if (Files.isDirectory(path)) {
@@ -56,26 +63,32 @@ public class DirectoryProcessor {
                 command.run(path.toString());
             }
         }
-
     }
 
-    private Path getPath(File file) {
-        Path path = file.toPath();
+    private Path getNormalizedPath(Path path) {
+        Path realPath = resolveSymbolicLink(path);
+
+        if (realPath != null){
+            Path absolute = realPath.toAbsolutePath().normalize();
+            if(!pathsExplored.contains(absolute.toString())){
+                pathsExplored.add(absolute.toString());
+                return absolute;
+            }
+        }
+        return null;
+    }
+
+    private Path resolveSymbolicLink(Path path){
         if (Files.isSymbolicLink(path)){
             try {
                 path = path.toRealPath();
             }
             catch (IOException e){
-                logger.log(Level.WARNING, "Could not resolve real path for " + file.getPath());
+                logger.log(Level.WARNING, "Could not resolve real path for " + path.toString());
+                return null;
             }
         }
-
-        Path absolute = path.toAbsolutePath().normalize();
-        if(!pathsExplored.contains(absolute.toString())){
-            pathsExplored.add(absolute.toString());
-            return absolute;
-        }
-        return null;
+        return path;
     }
 
 }

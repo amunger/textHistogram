@@ -44,21 +44,20 @@ public class FileExtractor implements Extractor {
 
     private void extractFile(ZipFile zipFile, ZipEntry entry, File destFile) throws IOException {
         int BUFFER = 2048;
-        BufferedInputStream is = new BufferedInputStream(zipFile.getInputStream(entry));
+        try(BufferedInputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry))) {
 
-        byte data[] = new byte[BUFFER];
+            byte data[] = new byte[BUFFER];
+            try(BufferedOutputStream dest = new BufferedOutputStream(new FileOutputStream(destFile), BUFFER)) {
 
-        FileOutputStream fos = new FileOutputStream(destFile);
-        BufferedOutputStream dest = new BufferedOutputStream(fos, BUFFER);
-
-        // read and write until last byte is encountered
-        int currentByte;
-        while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
-            dest.write(data, 0, currentByte);
+                int currentByte;
+                while ((currentByte = inputStream.read(data, 0, BUFFER)) != -1) {
+                    dest.write(data, 0, currentByte);
+                }
+                dest.flush();
+                dest.close();
+            }
+            inputStream.close();
         }
-        dest.flush();
-        dest.close();
-        is.close();
     }
 
     private String createWorkingDir(){
