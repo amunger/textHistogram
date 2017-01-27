@@ -48,11 +48,11 @@ public class DirectoryProcessor {
             if (Files.isDirectory(path)) {
                 processFilesInDir(path.toString());
             }
-            else if (path.getFileName().endsWith(".zip")){
+            else if (path.toString().endsWith(".zip")){
                 String extractedDir = fileExtractor.extract(path.toFile());
                 processFilesInDir(extractedDir);
             }
-            else if (path.getFileName().endsWith(".txt")){
+            else if (path.toString().endsWith(".txt")){
                 command.run(path.toString());
             }
         }
@@ -64,15 +64,16 @@ public class DirectoryProcessor {
         if (Files.isSymbolicLink(path)){
             try {
                 path = path.toRealPath();
-                Path absolute = path.toAbsolutePath();
-                if(!pathsExplored.contains(absolute.toString())){
-                    pathsExplored.add(absolute.toString());
-                    return absolute;
-                }
             }
             catch (IOException e){
                 logger.log(Level.WARNING, "Could not resolve real path for " + file.getPath());
             }
+        }
+
+        Path absolute = path.toAbsolutePath().normalize();
+        if(!pathsExplored.contains(absolute.toString())){
+            pathsExplored.add(absolute.toString());
+            return absolute;
         }
         return null;
     }
