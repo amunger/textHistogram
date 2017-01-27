@@ -14,7 +14,7 @@ public class DirectoryProcessor {
 
     private static Logger logger = Logger.getLogger(FileCommand.class.getName());
 
-    private static HashSet<String> pathsExplored = new HashSet<String>();
+    private HashSet<String> pathsExplored;
 
     Command command;
     Extractor fileExtractor;
@@ -22,6 +22,7 @@ public class DirectoryProcessor {
     public DirectoryProcessor(Command commandRunner, Extractor fileExtractor){
         this.command = commandRunner;
         this.fileExtractor = fileExtractor;
+        this.pathsExplored = new HashSet<String>();
     }
 
     public void processFilesInDir(String path){
@@ -60,6 +61,19 @@ public class DirectoryProcessor {
     }
 
     private Path getPath(File file) {
+        Path realPath = resolveSymbolicLink(file);
+
+        if (realPath != null){
+            Path absolute = realPath.toAbsolutePath().normalize();
+            if(!pathsExplored.contains(absolute.toString())){
+                pathsExplored.add(absolute.toString());
+                return absolute;
+            }
+        }
+        return null;
+    }
+    
+    private Path resolveSymbolicLink(File file){
         Path path = file.toPath();
         if (Files.isSymbolicLink(path)){
             try {
@@ -67,15 +81,10 @@ public class DirectoryProcessor {
             }
             catch (IOException e){
                 logger.log(Level.WARNING, "Could not resolve real path for " + file.getPath());
+                return null;
             }
         }
-
-        Path absolute = path.toAbsolutePath().normalize();
-        if(!pathsExplored.contains(absolute.toString())){
-            pathsExplored.add(absolute.toString());
-            return absolute;
-        }
-        return null;
+        return path;
     }
 
 }

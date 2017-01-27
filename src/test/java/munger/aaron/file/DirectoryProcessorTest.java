@@ -31,4 +31,12 @@ public class DirectoryProcessorTest {
         List<String> files = command.getStringsSeen();
         assertEquals(1, files.size());
     }
+
+    @Test
+    public void testGivenSameDirectoryTwice_willProcessOnce(){
+        directoryProcessor.processFilesInDir("./testDir/oneFileWithin");
+        directoryProcessor.processFilesInDir("./testDir/oneFileWithin");
+        List<String> files = command.getStringsSeen();
+        assertEquals(1, files.size());
+    }
 }
