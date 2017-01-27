@@ -3,12 +3,18 @@ package munger.aaron.file;
 import munger.aaron.command.Command;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DirectoryProcessor {
 
     private static Logger logger = Logger.getLogger(FileCommand.class.getName());
+
+    private static HashSet<String> pathsExplored = new HashSet<String>();
 
     Command command;
     Extractor fileExtractor;
@@ -19,6 +25,8 @@ public class DirectoryProcessor {
     }
 
     public void processFilesInDir(String path){
+        logger.log(Level.INFO, "processing " + path);
+
         File directory = new File(path);
         if (!directory.isDirectory()){
             logger.log(Level.WARNING, path + " does not map to a directory.");
@@ -34,16 +42,40 @@ public class DirectoryProcessor {
     }
 
     private void processFile(File file){
-        if (file.isDirectory()) {
-            processFilesInDir(file.getPath());
+        Path path = getPath(file);
+
+        if (path != null){
+            if (Files.isDirectory(path)) {
+                processFilesInDir(path.toString());
+            }
+            else if (path.toString().endsWith(".zip")){
+                String extractedDir = fileExtractor.extract(path.toFile());
+                processFilesInDir(extractedDir);
+            }
+            else if (path.toString().endsWith(".txt")){
+                command.run(path.toString());
+            }
         }
-        else if (file.getName().endsWith(".zip")){
-            String extractedDir = fileExtractor.extract(file);
-            processFilesInDir(extractedDir);
+
+    }
+
+    private Path getPath(File file) {
+        Path path = file.toPath();
+        if (Files.isSymbolicLink(path)){
+            try {
+                path = path.toRealPath();
+            }
+            catch (IOException e){
+                logger.log(Level.WARNING, "Could not resolve real path for " + file.getPath());
+            }
         }
-        else if (file.getName().endsWith(".txt")){
-            command.run(file.getPath());
+
+        Path absolute = path.toAbsolutePath().normalize();
+        if(!pathsExplored.contains(absolute.toString())){
+            pathsExplored.add(absolute.toString());
+            return absolute;
         }
+        return null;
     }
 
 }

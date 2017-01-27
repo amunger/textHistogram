@@ -21,8 +21,8 @@ public class Histogram implements Command {
         System.out.println();
         System.out.println("RESULTS:");
         for(Map.Entry<String, Integer> entry : entryList){
-            int longest = findLongestKey(20);
-            String word = padRight(entry.getKey().toString() + ":", longest);
+            int longest = findLongestKey(20) + 1;
+            String word = padRight(entry.getKey() + ":", longest);
             System.out.println(word + entry.getValue());
         }
     }
