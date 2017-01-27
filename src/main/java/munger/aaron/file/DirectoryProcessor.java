@@ -32,6 +32,10 @@ public class DirectoryProcessor {
             return;
         }
 
+        iterateOverDirectory(path, directory);
+    }
+
+    private void iterateOverDirectory(String path, Path directory) {
         try {
             DirectoryStream<Path> stream = Files.newDirectoryStream(directory);
             for (Path entry : stream) {
@@ -42,7 +46,6 @@ public class DirectoryProcessor {
         catch(IOException e){
             logger.log(Level.SEVERE, "IO Exception thrown while streaming directory: " + path, e);
         }
-
     }
 
     private void processFile(Path file){
